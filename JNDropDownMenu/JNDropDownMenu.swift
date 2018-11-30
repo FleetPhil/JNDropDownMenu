@@ -197,7 +197,7 @@ public class JNDropDownMenu: UIView {
         layer.bounds = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: sizeWidth, height: size.height))
         layer.string = string
         layer.fontSize = textFont.pointSize
-        layer.alignmentMode = kCAAlignmentCenter
+        layer.alignmentMode = CATextLayerAlignmentMode.center
         layer.foregroundColor = color.cgColor
         layer.contentsScale = UIScreen.main.scale
         layer.position = point
@@ -206,9 +206,9 @@ public class JNDropDownMenu: UIView {
     }
 
     func calculateTitleSizeWith(string: String) -> CGSize {
-        let dict = [NSFontAttributeName: textFont]
+        let dict = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): textFont]
         let constraintRect = CGSize(width: 280, height: 0)
-        let rect = string.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: dict, context: nil)
+        let rect = string.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(dict), context: nil)
         return rect.size
     }
 
@@ -217,7 +217,7 @@ public class JNDropDownMenu: UIView {
 // Tag gesture
 extension JNDropDownMenu {
 
-    func menuTapped(paramSender: UITapGestureRecognizer) {
+    @objc func menuTapped(paramSender: UITapGestureRecognizer) {
         let touchPoint = paramSender.location(in: self)
 
         //calculate index
@@ -249,7 +249,7 @@ extension JNDropDownMenu {
 
     }
 
-    func backgroundTapped(paramSender: UITapGestureRecognizer? = nil) {
+    @objc func backgroundTapped(paramSender: UITapGestureRecognizer? = nil) {
         self.animate(indicator: indicators[currentSelectedMenuIndex], background: self.backGroundView, tableView: self.tableView, title: titles[self.currentSelectedMenuIndex], forward: false) { _ in
             self.show = false
         }
@@ -350,7 +350,7 @@ extension JNDropDownMenu: UITableViewDataSource, UITableViewDelegate {
         let identifier = "DropDownMenuCell"
         var cell = tableView.dequeueReusableCell(withIdentifier: identifier)
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.default, reuseIdentifier: identifier)
+            cell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: identifier)
         }
 
         assert(self.datasource != nil, "menu's datasource shouldn't be nil")
@@ -395,4 +395,15 @@ extension JNDropDownMenu: UITableViewDataSource, UITableViewDelegate {
         self.currentSelectedMenuIndex = component
         self.confiMenuWith(row: row)
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }
